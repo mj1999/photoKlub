@@ -1,14 +1,21 @@
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://127.0.0.1/erp-db");
+require('dotenv').config();
+//URI FOR CONNECTING TO DB
+const uri = `mongodb+srv://${process.env.DB_ADMIN}:${process.env.DB_PASSWORD}@photoklub.tav86nq.mongodb.net/?retryWrites=true&w=majority&appName=photoKlub`;
 
-const db = mongoose.connection;
+//COPIED FROM MONGODB ATLAS NO IDEA WHAT IT MEANS
+const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
-db.on("error", (err) => {
-  console.log(err);
-});
+const connectToDb=async () =>{
+  try
+  {
+    await mongoose.connect(uri, clientOptions);
+    console.log('Connected to Mongodb Atlas');
+  }catch(err)
+  {
+    console.log(err)
+  }
 
-db.once("open", () => {
-  console.log("connected to db");
-});
+}
 
-module.exports = db;
+module.exports = connectToDb;
