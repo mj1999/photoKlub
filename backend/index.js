@@ -3,8 +3,10 @@ const express = require("express");
 
 const port = 1337;
 const app = express();
-
+//calling this method for DB connection
 connectToDb();
+
+//for decoding urlencoded strings
 app.use(express.urlencoded());
 
 app.use("/", require("./routes")); // router redirection to routes folder
