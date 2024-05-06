@@ -1,8 +1,22 @@
 const connectToDb = require("./config/dbConf");
+const passport = require("passport");
+const session = require("express-session");
+const passportStrategy = require("./config/passport");
 const express = require("express");
 
 const port = 1337;
 const app = express();
+app.use(
+	session({
+		secret: 'brownXLuciferous',
+    resave: false,
+    saveUninitialized: false
+	})
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 //calling this method for DB connection
 connectToDb();
 
