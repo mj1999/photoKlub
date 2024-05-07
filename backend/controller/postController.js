@@ -47,3 +47,4 @@ module.exports.getOne=async function(req,res){
     })
   }
 }
+
