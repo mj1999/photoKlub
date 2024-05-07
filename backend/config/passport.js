@@ -11,7 +11,7 @@ passport.use(
 			scope: ["profile", "email"],
 		},
 		function (accessToken, refreshToken, profile, callback) {
-			console.log(profile);
+			// console.log(profile);
 			User.findOne({email:profile.emails[0].value})
 			.then((user)=>{
 				if(user){
