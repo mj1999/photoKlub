@@ -1,11 +1,15 @@
 const postSchema = require("../models/postSchema");
 const commentSchema = require("../models/commentSchema");
 const likeSchema = require("../models/likeSchema");
+const userSchema = require("../models/userSchema");
 
 module.exports.create = async function (req, res) {
   const postData = req.body;
   const newPost = await postSchema.create(postData);
   if (newPost) {
+    const user = await userSchema.findById(req.body.authorId);
+    user.posts.push(newPost);
+    user.save();
     res.status(200).json({
       message: "Post uploaded succesfully",
       data: { newPost },
@@ -15,7 +19,15 @@ module.exports.create = async function (req, res) {
 
 module.exports.getAll = async function (req, res) {
   try {
-    const allPosts = await postSchema.find();
+    const allPosts = await postSchema
+      .find()
+      .populate("authorId")
+      .populate({
+        path: "comments",
+        populate: {
+          path: "authorId",
+        },
+      });
 
     if (allPosts)
       res.status(200).json({
@@ -49,26 +61,10 @@ module.exports.delete = async function (req, res) {
   try {
     const post = await postSchema.findByIdAndDelete(req.params.id);
     if (post) {
-      await commentSchema.deleteMany({ _id: { $in: post.comments } }, (err) => {
-        if (err) {
-          console.log(
-            "Error deleting comments associated with the post: ",
-            err
-          );
-          res.status(500).json({
-            message: `Error deleting comments associated with the post: ${err}`,
-          });
-          return;
-        }
-      });
-      await likeSchema.deleteMany({ _id: { $in: post.likes } }, (err) => {
-        if (err) {
-          console.log("Error deleting likes associated with the post: ", err);
-          res.status(500).json({
-            message: `Error deleting likes associated with the post: ${err}`,
-          });
-          return;
-        }
+      await commentSchema.deleteMany({ _id: { $in: post.comments } });
+      await likeSchema.deleteMany({ _id: { $in: post.likes } });
+      res.status(200).json({
+        message: "Post and associated comments/likes deleted",
       });
     } else {
       res.status(404).json({
